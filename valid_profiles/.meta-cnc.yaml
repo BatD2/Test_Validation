@@ -1,0 +1,48 @@
+# skillet preamble information used by panhandler
+# ---------------------------------------------------------------------
+
+
+name: validate_profile
+label: Profile Validation 1
+
+description: |
+  Testing Security Profiles 1
+
+type: pan_validation
+labels:
+  collection:
+    - Example Skillets
+    - Validation
+    - MySkillets
+
+# ---------------------------------------------------------------------
+# end of preamble section
+
+# variables section
+# ---------------------------------------------------------------------
+
+variables:
+  - name: dg_name
+    description: Device Group Name
+    default: test_dg1
+    type_hint: text
+
+## Device Group Tests
+  - name: parse config variable and capture device group url filtering profile as an object
+    cmd: parse
+    variable: config
+    outputs:
+      - name: url-filtering_object
+        capture_list: |-
+          /config//device-group/entry[@name='test_dg1']/profiles/url-filtering/entry/@name
+      - name: url_profiles_block_malware
+        capture_list: |-
+          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/url-filtering/entry
+          /block/member[text()='malware']/../../@name
+      - name: url_profiles_not_blocking_malware
+        capture_list: |-
+          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/url-filtering/entry/@name
+        filter_items: item not in url_profiles_block_malware
+
+# ---------------------------------------------------------------------
+# end of snippets section

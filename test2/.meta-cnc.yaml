@@ -1,0 +1,70 @@
+# skillet preamble information used by panhandler
+# ---------------------------------------------------------------------
+
+
+name: validate_test2
+label: Profile Test 2
+
+description: |
+  Testing 2
+
+type: pan_validation
+labels:
+  collection:
+    - Example Skillets
+    - Validation
+    - MySkillets
+
+# ---------------------------------------------------------------------
+# end of preamble section
+
+# variables section
+# ---------------------------------------------------------------------
+
+variables:
+  - name: template_name
+    description: Input Template Name
+    default: test_template1
+    type_hint: text
+  - name: dg_name
+    description: Device Group Name
+    default: test_dg1
+    type_hint: text
+
+  - name: parse config variable and capture xpath as an object
+    cmd: parse
+    variable: config
+    outputs:
+      - name: deviceconfig_system
+        capture_object: /config//template/entry[@name='test_template1']//deviceconfig/system
+
+  - name: test_telnet_enabled
+    label: Check if telnet is disabled on interface
+    fail_message: telnet is enabled!
+    test: deviceconfig_system | element_value('system.service.disable-telnet') == 'yes'
+    documentation_link: https://live.paloaltonetworks.com/t5/Skillet-District/ct-p/Skillets
+  - name: test_http_enabled
+    label: Check if http is disabled on interface
+    fail_message: HTTP is enabled!
+    test: deviceconfig_system | element_value('system.service.disable-http') == 'yes'
+    documentation_link: https://live.paloaltonetworks.com/t5/Skillet-District/ct-p/Skillets
+
+## Device Group Tests
+  - name: parse config variable and capture device group url filtering profile as an object
+    cmd: parse
+    variable: config
+    outputs:
+      - name: url-filtering_object
+        capture_list: |-
+          /config//device-group/entry[@name='test_dg1']/profiles/url-filtering/entry/@name
+      - name: url_profiles_block_malware
+        capture_list: |-
+          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/url-filtering/entry
+          /block/member[text()='malware']/../../@name
+      - name: url_profiles_not_blocking_malware
+        capture_list: |-
+          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/url-filtering/entry/@name
+        filter_items: item not in url_profiles_block_malware
+
+# ---------------------------------------------------------------------
+# end of snippets section
